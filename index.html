@@ -684,15 +684,54 @@ function idxSelectTier(amount, mode, btn) {
   btn.classList.add("active");
 }
 
-function idxDonate() {
-  if (idxAmount === null) {
-    var calc = document.getElementById("calc-input") ? document.getElementById("calc-input").value : null;
-    if (calc && parseFloat(calc) > 0) { openModal2(parseFloat(calc)); return; }
-    openModal1(); return;
+async function idxDonate() {
+  const btn = document.getElementById('idx-donate-btn');
+
+  // If a fixed tier card is selected, route directly to its Stripe link
+  if (idxAmount !== null && idxAmount !== 'custom') {
+    const links = idxMode === 'once' ? STRIPE_ONCE : STRIPE_MONTHLY;
+    const url = links[idxAmount];
+    if (url) { window.open(url, '_blank'); return; }
   }
-  var links = idxMode === "once" ? STRIPE_ONCE : STRIPE_MONTHLY;
-  var url = links[idxAmount] || links.custom;
-  window.open(url, "_blank");
+
+  // Otherwise use the calculator value or fall back to opening Modal 1
+  const calcInput = document.getElementById('calc-input');
+  const calcVal = calcInput ? parseFloat(calcInput.value) : null;
+
+  if (!calcVal || calcVal < 1) {
+    // No amount entered — open the modal so they can pick
+    openModal1();
+    return;
+  }
+
+  // Call the Netlify function to create a Stripe Checkout Session
+  btn.textContent = 'Loading...';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch('/api/create-checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        amount: calcVal,
+        mode: idxMode  // 'once' or 'monthly'
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.url) {
+      window.location.href = data.url;  // redirect to Stripe Checkout
+    } else {
+      alert('Something went wrong. Please try again or email natalie@sorensn.com');
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Something went wrong. Please try again or email natalie@sorensn.com');
+  } finally {
+    btn.textContent = 'Donate now';
+    btn.disabled = false;
+  }
 }
 
 function updateCalc() {
@@ -754,14 +793,44 @@ function m1Select(amount, mode, btn) {
   btn.classList.add("mtier-active");
 }
 
-function m1Donate() {
-  if (m1Amount === null || m1Amount === "custom") {
-    var links = m1Mode === "once" ? STRIPE_ONCE : STRIPE_MONTHLY;
-    window.open(links.custom, "_blank"); return;
+async function m1Donate() {
+  const btn = document.querySelector('#modal1-overlay .donate-btn');
+
+  // Fixed tier selected
+  if (m1Amount !== null && m1Amount !== 'custom') {
+    const links = m1Mode === 'once' ? STRIPE_ONCE : STRIPE_MONTHLY;
+    const url = links[m1Amount];
+    if (url) { window.open(url, '_blank'); return; }
   }
-  var links = m1Mode === "once" ? STRIPE_ONCE : STRIPE_MONTHLY;
-  window.open(links[m1Amount] || links.custom, "_blank");
+
+  // Custom amount — call Netlify function
+  if (btn) { btn.textContent = 'Loading...'; btn.disabled = true; }
+
+  try {
+    const res = await fetch('/api/create-checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        amount: m1Amount || 89,
+        mode: m1Mode
+      })
+    });
+
+    const data = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      alert('Something went wrong. Please try again or email natalie@sorensn.com');
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Something went wrong.');
+  } finally {
+    if (btn) { btn.textContent = 'Donate'; btn.disabled = false; }
+  }
 }
+</script>
+
 
 // Modal 2
 var m2Amount = null;
