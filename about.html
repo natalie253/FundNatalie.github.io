@@ -436,7 +436,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;height:66px;display:flex;ali
         <div id="m1-custom-once-wrap" style="display:none;margin-bottom:0.5rem">
           <div class="custom-wrap" style="margin-bottom:0.3rem">
             <span class="sym">$</span>
-            <input type="number" class="custom-input" id="custom-once-val" placeholder="Enter amount" min="1" oninput="m1UpdateCalc('once')">
+            <input type="number" class="custom-input" id="custom-once-val" placeholder="Enter amount" min="1" oninput="UpdateCalc('once')">
           </div>
           <p id="m1-custom-once-result" style="font-size:0.75rem;color:var(--text-mid);line-height:1.5;min-height:1.1em;text-align:center"></p>
         </div>
@@ -454,10 +454,13 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;height:66px;display:flex;ali
         <button class="mtier" id="m1-custom-monthly-btn" style="width:100%;margin-bottom:0.5rem;flex-direction:row;gap:0.5rem;padding:10px 12px;justify-content:center" onclick="m1ShowCustom('monthly')">
           <span class="mtier-amt" style="font-size:0.95rem">Choose my own monthly amount</span>
         </button>
-        <div id="m1-custom-monthly-wrap" style="display:none;margin-bottom:0.5rem">
-          <div class="custom-wrap" style="margin-bottom:0.3rem">
-            <span class="sym">$</span>
-            <input type="number" class="custom-input" id="custom-monthly-val" placeholder="Enter monthly amount" min="1" oninput="m1UpdateCalc('monthly')">
+        <div class="custom-wrap" style="margin-bottom:0.3rem">
+          <span class="sym">$</span>
+            <input type="number" class="custom-input" id="custom-monthly-val" placeholder="Enter monthly amount" min="1" oninput="updateCustomCalc('monthly')">
+            </div>
+  <span class="sym">$</span>
+  <input type="number" class="custom-input" id="custom-monthly-val" placeholder="Enter monthly amount" min="1" oninput="updateCustomCalc('monthly')">
+</div>
           </div>
           <p id="m1-custom-monthly-result" style="font-size:0.75rem;color:var(--text-mid);line-height:1.5;min-height:1.1em;text-align:center"></p>
         </div>
@@ -468,13 +471,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;height:66px;display:flex;ali
   </div>
 </div>
 
-<!-- MODAL 2: Frequency chooser (for custom calculator amount) -->
 
-<script>
-const obs=new IntersectionObserver(en=>{en.forEach(e=>{if(e.isIntersecting)e.target.classList.add("visible")})},{threshold:0.08,rootMargin:"0px 0px -30px 0px"});
-document.querySelectorAll(".fade-in").forEach(el=>obs.observe(el));
-function toggleMenu(){document.getElementById("mobile-menu").classList.toggle("open")}
-document.addEventListener("click",e=>{const m=document.getElementById("mobile-menu");const b=document.querySelector(".nav-hamburger");if(m&&!m.contains(e.target)&&b&&!b.contains(e.target))m.classList.remove("open")});
 
 
 const STRIPE_ONCE = {
